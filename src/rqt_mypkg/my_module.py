@@ -16,7 +16,7 @@ class MyPlugin(Plugin):
         self.setObjectName('MyPlugin')
         # Create publisher
         self.signal_publisher = rospy.Publisher('/gui_signal', String, queue_size=10)
-        self.speech_publisher = rospy.Publisher('/speech_content', String, queue_size=10)
+        # self.speech_publisher = rospy.Publisher('/speech_content', String, queue_size=10)
         # Process standalone plugin command-line arguments
         from argparse import ArgumentParser
         parser = ArgumentParser()
@@ -47,10 +47,11 @@ class MyPlugin(Plugin):
             self._widget.setWindowTitle(self._widget.windowTitle())
         # Add widget to the user interface
         context.add_widget(self._widget)
+        self._widget.motorinitButton.clicked[bool].connect(self.__handle_motor_init_clicked)
+        self._widget.positioninitButton.clicked[bool].connect(self.__handle_position_init_clicked)
         self._widget.stopButton.clicked[bool].connect(self.__handle_stop_clicked)
         self._widget.startButton.clicked[bool].connect(self.__handle_start_clicked)
         self._widget.standbyButton.clicked[bool].connect(self.__handle_standby_clicked)
-        self._widget.talkButton.clicked[bool].connect(self.__handle_talk_clicked)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -65,6 +66,18 @@ class MyPlugin(Plugin):
         # TODO restore intrinsic configuration, usually using:
         # v = instance_settings.value(k)
         pass
+
+    def __handle_motor_init_clicked(self):
+        msg = String()
+        msg.data = 'MOTORINIT'
+        self.signal_publisher.publish(msg)
+        rospy.loginfo('MOTOR INIT Button is clicked')
+
+    def __handle_position_init_clicked(self):
+        msg = String()
+        msg.data = 'POSITIONINIT'
+        self.signal_publisher.publish(msg)
+        rospy.loginfo('POSITION INIT Button is clicked')
 
     def __handle_standby_clicked(self):
         msg = String()
@@ -84,8 +97,8 @@ class MyPlugin(Plugin):
         self.signal_publisher.publish(msg)
         rospy.loginfo("START Button is clicked")
 
-    def __handle_talk_clicked(self):
-        msg = String()
-        msg.data = self._widget.speechText.text()
-        self.speech_publisher.publish(msg)
-        rospy.loginfo('TALK Button is clicked: {}'.format(msg.data))
+#    def __handle_talk_clicked(self):
+#        msg = String()
+#        msg.data = self._widget.speechText.text()
+#        self.speech_publisher.publish(msg)
+#        rospy.loginfo('TALK Button is clicked: {}'.format(msg.data))
